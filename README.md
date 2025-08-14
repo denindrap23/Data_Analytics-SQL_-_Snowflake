@@ -2,7 +2,7 @@
 
 ## 1. SQL
 
-### 1.1. HR Analytics
+### 1.1. Analyzing eCommerce Business Performance with SQL
 
 #### Project Description
 <p align= "justify">
