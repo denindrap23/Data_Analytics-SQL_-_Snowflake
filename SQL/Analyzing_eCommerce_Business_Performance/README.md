@@ -1,9 +1,11 @@
 # Analyzing eCommerce Business Performance with SQL
 
 ## Deskripsi Project
+<p align= "justify">
 Pada project ini, saya berperan sebagai anggota tim **Data Analytics** di sebuah perusahaan eCommerce besar di Amerika Selatan.  
 Perusahaan ini merupakan salah satu marketplace terbesar di wilayah tersebut, menghubungkan pelaku usaha mikro dengan jutaan pelanggan.  
 Tugas saya adalah menganalisis **tiga aspek kunci performa bisnis** untuk membantu manajemen mengambil keputusan strategis.
+</p>
 
 Ketiga aspek yang saya analisis adalah:
 1. **Pertumbuhan Pelanggan**
@@ -59,8 +61,8 @@ Berikut adalah penjelasan detail setiap dataset:
 ## Proses Pengerjaan
 ### 1. **Data Preparation**
    - Membuat workspace database.
-
-    CREATE TABLE customers (
+```sql
+	CREATE TABLE customers (
 	    customer_id VARCHAR(250),
 	    customer_unique_id VARCHAR(250),
 	    customer_zip_code_prefix INT,
@@ -75,7 +77,7 @@ Berikut adalah penjelasan detail setiap dataset:
 	    geo_city VARCHAR(250),
 	    geo_state VARCHAR(250)
     );
-
+ 
     CREATE TABLE order_item (
 	    order_id VARCHAR(250),
 	    order_item_id INT,
@@ -133,10 +135,11 @@ Berikut adalah penjelasan detail setiap dataset:
 	    seller_city VARCHAR(250),
     	seller_state VARCHAR(250)
     );
-	
-	
+```
+ 
    - Mengimpor semua dataset CSV ke dalam database.
 
+```sql
 	COPY customers (
          customer_id,
          customer_unique_id,
@@ -234,11 +237,11 @@ Berikut adalah penjelasan detail setiap dataset:
    	FROM 'C:\Users\denindra\Documents\Project\SQL\Dataset\sellers_dataset.csv'
     DELIMITER ','
     CSV HEADER;
-    
+```
 	
    - Membuat **Entity Relationship Diagram (ERD)** untuk memahami hubungan antar tabel.
 
-	
+```sql
     ## Primary Key
     ALTER TABLE products ADD CONSTRAINT pk_products PRIMARY KEY (product_id);
     ALTER TABLE order_items ADD FOREIGN KEY (product_id) REFERENCES products;
@@ -256,15 +259,14 @@ Berikut adalah penjelasan detail setiap dataset:
     ALTER TABLE payments ADD FOREIGN KEY (order_id) REFERENCES orders;
     ALTER TABLE order_items ADD FOREIGN KEY (product_id) REFERENCES products;
     ALTER TABLE reviews ADD FOREIGN KEY (order_id) REFERENCES orders;
-    
+```
 	
- 	![ERD](image/ERD.png)
+ ![ERD](image/ERD.png)
 
 ### 2. SQL Query Development
 #### 2.1. Annual Customer Activity Growth Analysis
   - Query
-
-     
+```sql
      WITH 
      ## Rata-rata jumlah customer aktif bulanan (monthly active user)
      calc_mau AS (
@@ -345,10 +347,152 @@ Berikut adalah penjelasan detail setiap dataset:
      JOIN calc_newcust newc ON mau.year = newc.year
      JOIN calc_repeat rep ON rep.year = mau.year
      JOIN calc_avg_freq freq ON freq.year = mau.year
+```
      
-
   - Result
-      
+    
+    ![analysis1](image/analysis1.png)
+    
+  - Analysis
+    | Visualization | Analysis |
+	|-----------------|---------------|
+	| ![analysis2](image/analysis2.png) | <p align= "justify"> Data yang tersedia dimulai dari data transaksi pada bulan September 2016 sehingga menyebabkan hasil analisis di tahun 2016 memiliki perbedaan yang jauh dibandingkan dengan nilai di tahun 2017 dan 2018. Dari analisis ini, terlihat bahwa aktivitas pelanggan bulanan (MAU) dan juga jumlah pelanggan baru mengalami peningkatan. </p> |
+	| ![analysis3](image/analysis3.png) | <p align= "justify"> Namun di sisi lain, dari segi pemesanan/order yang dilakukan pelanggan terlihat tidak terlalu baik. Terlihat bahwa kebanyakan dari pelanggan hanya melakukan order satu kali sepanjang tahun. Bahkan jumlah pelanggan yang melakukan repeat order mengalami sedikit penurunan dari tahun 2017 ke tahun 2018. </p> |
+
+#### 2.2. Annual Customer Activity Growth Analysis
+  - Query
+```sql
+	## Informasi pendapatan/revenue perusahaan
+	CREATE TABLE total_revenue_per_year AS
+	SELECT 
+		DATE_PART('year', o.order_purchase_timestamp) AS year,
+		SUM(revenue_per_order) AS revenue
+	FROM (
+		SELECT 
+			order_id, 
+			SUM(price+freight_value) AS revenue_per_order
+		FROM order_items
+		GROUP BY 1
+	) subq
+	JOIN orders o ON subq.order_id = o.order_id
+	WHERE o.order_status = 'delivered'
+	GROUP BY 1;
+
+	## Informasi jumlah cancel order
+	CREATE TABLE total_cancel_per_year AS 
+	SELECT 
+		DATE_PART('year', order_purchase_timestamp) AS year,
+		COUNT(1) AS num_canceled_orders
+	FROM orders
+	WHERE order_status = 'canceled'
+	GROUP BY 1;
+
+	## Kategori produk yang memberikan pendapatan total tertinggi
+	CREATE TABLE top_product_category_by_revenue_per_year AS 
+	SELECT 
+		year, 
+		product_category_name, 
+		revenue 
+	FROM (
+		SELECT 
+			DATE_PART('year', o.order_purchase_timestamp) AS year,
+			p.product_category_name,
+			SUM(oi.price + oi.freight_value) AS revenue,
+			RANK() OVER(PARTITION BY 
+		DATE_PART('year', o.order_purchase_timestamp) 
+ 		ORDER BY 
+		SUM(oi.price + oi.freight_value) desc) AS rk
+		FROM order_items oi
+	JOIN orders o ON o.order_id = oi.order_id
+	JOIN products p ON p.product_id = oi.product_id
+	WHERE o.order_status = 'delivered'
+	GROUP BY 1,2) sq
+	WHERE rk = 1;
+
+	## Kategori produk yang memiliki jumlah cancel order terbanyak
+	CREATE TABLE most_canceled_product_category_per_year AS 
+	SELECT 
+		year, 
+		product_category_name, 
+		num_canceled 
+	FROM (
+	SELECT 
+		DATE_PART('year', o.order_purchase_timestamp) AS year,
+		p.product_category_name,
+		COUNT(1) AS num_canceled,
+		RANK() OVER(PARTITION BY 
+		DATE_PART('year', o.order_purchase_timestamp) 
+		ORDER BY COUNT(1) desc) AS rk
+	FROM order_items oi
+	JOIN orders o ON o.order_id = oi.order_id
+	JOIN products p ON p.product_id = oi.product_id
+	WHERE o.order_status = 'canceled'
+	GROUP BY 1,2) sq
+	WHERE rk = 1;
+
+	## Menggabungkan informasi-informasi yang telah didapatkan
+	SELECT 
+		a.year,
+		a.product_category_name AS top_product_category_by_revenue,
+		a.revenue AS category_revenue,
+		b.revenue AS year_total_revenue,
+		c.product_category_name AS most_canceled_product_category,
+		c.num_canceled AS category_num_canceled,
+		d.num_canceled_orders AS year_total_num_canceled
+	FROM top_product_category_by_revenue_per_year a
+	JOIN total_revenue_per_year b ON a.year = b.year 
+	JOIN most_canceled_product_category_per_year c ON a.year = c.year 
+	JOIN total_cancel_per_year d ON d.year = a.year;
+```
+  - Result
+    
+    ![analysis4](image/analysis4.png)
+    
+  - Analysis
+<p align= "justify">
+    Dari analisis ini, terlihat bahwa kategori produk yang memberikan revenue terbanyak setiap tahunnya mengalami perubahan. Dilihat dari sisi revenue perusahaan secara keseluruhan juga mengalami peningkatan setiap tahunnya. Untuk kategori produk yang mengalami cancel terbanyak juga mengalami perubahan setiap tahunnya. Hal yang menarik untuk diperhatikan di sini adalah kategori produk health & beauty merupakan kategori produk yang memberikan revenue terbanyak sekaligus kategori produk yang mengalami cancel terbanyak di tahun 2018. 
+Hal ini mungkin terjadi karena pada tahun 2018 memang kategori produk yang mendominasi keseluruhan transaksi adalah health & beauty. Analisis lebih lanjut dapat dilakukan untuk mengkonfirmasi hal ini.
+</p>
+
+#### 2.3. Analysis of Annual Payment Type Usage
+  - Query
+```sql
+	WITH 
+	tmp AS (
+	SELECT 
+		DATE_PART('year', o.order_purchase_timestamp) AS year,
+		op.payment_type,
+		COUNT(1) AS num_used
+	FROM order_payments op 
+	JOIN orders o ON o.order_id = op.order_id
+	GROUP BY 1, 2
+	) 
+
+	SELECT *,
+		CASE WHEN year_2017 = 0 then NULL
+			 ELSE round((year_2018 - year_2017) / year_2017, 2)
+			 END AS pct_change_2017_2018
+		FROM (
+			SELECT 
+  				payment_type,
+				SUM(CASE WHEN year = '2016' then num_used ELSE 0 end) AS year_2016,
+  				SUM(CASE WHEN year = '2017' then num_used ELSE 0 end) AS year_2017,
+  				SUM(CASE WHEN year = '2018' then num_used ELSE 0 end) AS year_2018
+			FROM tmp 
+			GROUP BY 1) subq
+		ORDER BY 5 DESC;
+```
+  - Result
+    
+    ![analysis5](image/analysis5.png)
+    
   - Analysis
     
-       
+    <img src="./image/analysis6.png" width="600">
+<p align= "justify">
+	Secara keseluruhan, metode pembayaran yang lebih diminati adalah kartu kredit, sehingga dapat dilakukan analisis lebih lanjut mengenai kebiasaan pelanggan dalam menggunakan kartu kredit, misalnya seperti lama tenor yang dipilih, kategori produk apa yang biasa dibeli dengan kartu kredit, dsb. 
+Hal lain yang menarik untuk diperhatikan di sini adalah peningkatan penggunaan kartu debit yang signifikan, yaitu lebih dari 100% dari tahun 2017 ke tahun 2018. Di sisi lain, penggunaan voucher justru menurun dari tahun 2017 ke tahun 2018. 
+Hal ini mungkin terjadi karena adanya promosi/kerja sama dengan kartu debit tertentu dan juga pengurangan metode promosi menggunakan voucher. Analisis lebih lanjut dapat dilakukan dengan melakukan konfirmasi dengan departemen lain, misalnya Marketing atau Business Development terkait hal ini.
+</p>
+
+
