@@ -2,9 +2,9 @@
 
 ## Deskripsi Project
 <p align= "justify">
-Pada project ini, saya berperan sebagai anggota tim **Data Analytics** di sebuah perusahaan eCommerce besar di Amerika Selatan.  
+Pada project ini, saya berperan sebagai anggota tim Data Analytics di sebuah perusahaan eCommerce besar di Amerika Selatan.  
 Perusahaan ini merupakan salah satu marketplace terbesar di wilayah tersebut, menghubungkan pelaku usaha mikro dengan jutaan pelanggan.  
-Tugas saya adalah menganalisis **tiga aspek kunci performa bisnis** untuk membantu manajemen mengambil keputusan strategis.
+Tugas saya adalah menganalisis tiga aspek kunci performa bisnis untuk membantu manajemen mengambil keputusan strategis.
 </p>
 
 Ketiga aspek yang saya analisis adalah:
