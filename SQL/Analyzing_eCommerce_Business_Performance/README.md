@@ -14,19 +14,19 @@ Analisis ini dilakukan menggunakan **SQL** dengan memanfaatkan 9 dataset yang su
 
 ---
 
-## Dataset yang Digunakan
+## Dataset
 Berikut adalah penjelasan detail setiap dataset:
 
 | Dataset        | Deskripsi |
 |----------------|-----------|
-| **customers**  | Informasi pelanggan, termasuk ID pelanggan dan lokasi. |
-| **geolocation**| Data koordinat geografis (latitude, longitude) yang dikaitkan dengan kode pos. |
-| **order_items**| Detail barang pada setiap pesanan, termasuk harga, biaya pengiriman, dan ID produk. |
-| **payments**   | Data transaksi pembayaran, termasuk metode pembayaran, nilai pembayaran, dan jumlah cicilan. |
-| **reviews**    | Ulasan pelanggan, termasuk rating dan komentar. |
-| **orders**     | Data pesanan pelanggan, termasuk tanggal pembelian, status, dan waktu pengiriman. |
-| **products**   | Informasi produk, termasuk kategori, ukuran, dan detail lainnya. |
-| **sellers**    | Informasi penjual, termasuk ID penjual dan lokasi. |
+| `customers_dataset.csv`  | Informasi pelanggan, termasuk ID pelanggan dan lokasi. |
+| `geolocation_dataset` | Data koordinat geografis (latitude, longitude) yang dikaitkan dengan kode pos. |
+| `order_items_dataset.csv` | Detail barang pada setiap pesanan, termasuk harga, biaya pengiriman, dan ID produk. |
+| `order_payments_dataset` | Data transaksi pembayaran, termasuk metode pembayaran, nilai pembayaran, dan jumlah cicilan. |
+| `order_reviews_dataset` | Ulasan pelanggan, termasuk rating dan komentar. |
+| `orders_dataset.csv` | Data pesanan pelanggan, termasuk tanggal pembelian, status, dan waktu pengiriman. |
+| `product_dataset.csv` | Informasi produk, termasuk kategori, ukuran, dan detail lainnya. |
+| `sellers_dataset` | Informasi penjual, termasuk ID penjual dan lokasi. |
 
 ---
 
@@ -60,7 +60,6 @@ Berikut adalah penjelasan detail setiap dataset:
 ### 1. **Data Preparation**
    - Membuat workspace database.
 
-    ```
     CREATE TABLE customers (
 	    customer_id VARCHAR(250),
 	    customer_unique_id VARCHAR(250),
@@ -134,114 +133,112 @@ Berikut adalah penjelasan detail setiap dataset:
 	    seller_city VARCHAR(250),
     	seller_state VARCHAR(250)
     );
-
-    ```
-    
+	
+	
    - Mengimpor semua dataset CSV ke dalam database.
 
-   ```
-   COPY customers (
-     customer_id,
-     customer_unique_id,
-     customer_zip_code_prefix,
-     customer_city,
-     customer_state
-   )
-   FROM 'C:\Users\denindra\Documents\Project\SQL\Dataset\customers_dataset.csv'
-   DELIMITER ','
-   CSV HEADER;
+	COPY customers (
+         customer_id,
+         customer_unique_id,
+     	 customer_zip_code_prefix,
+     	 customer_city,
+     	 customer_state
+   	)
+   	FROM 'C:\Users\denindra\Documents\Project\SQL\Dataset\customers_dataset.csv'
+   	DELIMITER ','
+   	CSV HEADER;
 
-   COPY geolocation (
-	    geo_zip_code_prefix,
-	    geo_lat,
-	    geo_lng,
-	    geo_city,
-	    geo_state
-   )
-   FROM 'C:\Users\denindra\Documents\Project\SQL\Dataset\geolocation_dataset.csv'
-   DELIMITER ','
-   CSV HEADER;
+   	COPY geolocation (
+	     geo_zip_code_prefix,
+	     geo_lat,
+	     geo_lng,
+	     geo_city,
+	     geo_state
+   	)
+   	FROM 'C:\Users\denindra\Documents\Project\SQL\Dataset\geolocation_dataset.csv'
+   	DELIMITER ','
+   	CSV HEADER;
 
-   COPY order_item (
-	    order_id,
-	    order_item_id,
-	    product_id,
-	    seller_id,
-	    shipping_limit_date,
-	    price,
-	    freight_value
-   )
-   FROM 'C:\Users\denindra\Documents\Project\SQL\Dataset\order_items_dataset.csv'
-   DELIMITER ','
-   CSV HEADER;
+   	COPY order_item (
+	     order_id,
+	     order_item_id,
+	     product_id,
+	     seller_id,
+	     shipping_limit_date,
+	     price,
+	     freight_value
+   	)
+   	FROM 'C:\Users\denindra\Documents\Project\SQL\Dataset\order_items_dataset.csv'
+   	DELIMITER ','
+   	CSV HEADER;
 
-   COPY payments (
-	    order_id,
-	    payment_sequential,
-	    payment_type,
-	    payment_installment,
-	    payment_value
-   )
-   FROM 'C:\Users\denindra\Documents\Project\SQL\Datasetorder_payments_dataset.csv'
-   DELIMITER ','
-   CSV HEADER;
+   	COPY payments (
+	     order_id,
+	     payment_sequential,
+	     payment_type,
+	     payment_installment,
+	     payment_value
+   	)
+   	FROM 'C:\Users\denindra\Documents\Project\SQL\Datasetorder_payments_dataset.csv'
+   	DELIMITER ','
+   	CSV HEADER;
 
-   COPY reviews (
-	    review_id,
-	    order_id,
-	    review_score, 
-	    review_comment_title,
-	    review_comment_message,
-	    review_creation_date,
-	    review_answer
-   )
-   FROM 'C:\Users\denindra\Documents\Project\SQL\Dataset\order_reviews_dataset.csv'
-   DELIMITER ','
-   CSV HEADER;
+   	COPY reviews (
+	     review_id,
+	     order_id,
+	     review_score, 
+	     review_comment_title,
+	     review_comment_message,
+	     review_creation_date,
+	     review_answer
+   	)
+   	FROM 'C:\Users\denindra\Documents\Project\SQL\Dataset\order_reviews_dataset.csv'
+   	DELIMITER ','
+   	CSV HEADER;
 
-   COPY orders (
-	    order_id,
-	    customers_id,
-	    order_status,
-	    order_purchase_timestamp,
-	    order_approved_at,
-	    order_delivered_carrier_date,
-	    order_delivered_customer_date,
-	    order_estimated_delivered_date
-   )
-   FROM 'C:\Users\denindra\Documents\Project\SQL\Dataset\orders_dataset.csv'
-   DELIMITER ','
-   CSV HEADER;
+   	COPY orders (
+	     order_id,
+	     customers_id,
+	     order_status,
+	     order_purchase_timestamp,
+	     order_approved_at,
+	     order_delivered_carrier_date,
+	     order_delivered_customer_date,
+	     order_estimated_delivered_date
+   	)
+   	FROM 'C:\Users\denindra\Documents\Project\SQL\Dataset\orders_dataset.csv'
+   	DELIMITER ','
+   	CSV HEADER;
 
-   COPY products (
-	    product_id,
-	    product_category_name,
-	    product_name_length,
-	    product_description_length,
-	    product_photos_qty,
-	    product_weight_g,
-	    product_length_cm,
-	    product_height_cm,
-	    product_width_cm
-   )
-   FROM 'C:\Users\denindra\Documents\Project\SQL\Dataset\product_dataset.csv'
-   DELIMITER ','
-   CSV HEADER;
+   	COPY products (
+	     product_id,
+	     product_category_name,
+	     product_name_length,
+	     product_description_length,
+	     product_photos_qty,
+	     product_weight_g,
+	     product_length_cm,
+	     product_height_cm,
+	     product_width_cm
+   	)
+   	FROM 'C:\Users\denindra\Documents\Project\SQL\Dataset\product_dataset.csv'
+   	DELIMITER ','
+  	CSV HEADER;
 
-   COPY sellers (
-	    seller_id,
-	    seller_zip_code,
-	    seller_city,
-    	seller_state
-   )
-   FROM 'C:\Users\denindra\Documents\Project\SQL\Dataset\sellers_dataset.csv'
-   DELIMITER ','
-   CSV HEADER;
-   
-   ```
+  	COPY sellers (
+	     seller_id,
+	     seller_zip_code,
+	     seller_city,
+       	 seller_state
+    )
+   	FROM 'C:\Users\denindra\Documents\Project\SQL\Dataset\sellers_dataset.csv'
+    DELIMITER ','
+    CSV HEADER;
+    
+	
    - Membuat **Entity Relationship Diagram (ERD)** untuk memahami hubungan antar tabel.
 
-    ```
+	
     ## Primary Key
     ALTER TABLE products ADD CONSTRAINT pk_products PRIMARY KEY (product_id);
     ALTER TABLE order_items ADD FOREIGN KEY (product_id) REFERENCES products;
@@ -259,14 +256,15 @@ Berikut adalah penjelasan detail setiap dataset:
     ALTER TABLE payments ADD FOREIGN KEY (order_id) REFERENCES orders;
     ALTER TABLE order_items ADD FOREIGN KEY (product_id) REFERENCES products;
     ALTER TABLE reviews ADD FOREIGN KEY (order_id) REFERENCES orders;
-    ```
     
+	
+ 	![ERD](image/ERD.png)
 
 ### 2. SQL Query Development
 #### 2.1. Annual Customer Activity Growth Analysis
   - Query
 
-     ```
+     
      WITH 
      ## Rata-rata jumlah customer aktif bulanan (monthly active user)
      calc_mau AS (
@@ -347,7 +345,7 @@ Berikut adalah penjelasan detail setiap dataset:
      JOIN calc_newcust newc ON mau.year = newc.year
      JOIN calc_repeat rep ON rep.year = mau.year
      JOIN calc_avg_freq freq ON freq.year = mau.year
-     ```
+     
 
   - Result
       
